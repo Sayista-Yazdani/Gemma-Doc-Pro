@@ -56,17 +56,18 @@
 
 ## Overview
 
-**Gemma Doc Pro** is a fully browser-based, AI-augmented code intelligence dashboard. It accepts either a **local project folder upload** or a **GitHub public repository URL**, analyzes the source code entirely on your machine, and produces a multi-tab structured report covering:
+**Gemma Doc Pro** is a fully browser-based, AI-augmented code intelligence dashboard. It accepts either a **local project folder upload** or a **GitHub/GitLab repository URL**, analyzes the source code entirely on your machine, and produces a multi-tab structured report covering:
 
 - Executive summary with LOC, file count, and API surface
-- Visual dependency architecture (2D Mermaid graph + 3D neural orbit)
+- Visual dependency architecture (clean, dark-themed base Mermaid.js diagram with SVG caching)
+- Pinned and interactive Gemma AI chat assistant for contextual codebase Q&A
 - Detected API endpoints (Express, Next.js, Laravel, FastAPI, Flask)
 - Risk analysis and security vulnerability scanning (OWASP-aligned)
 - Optimization roadmap with before/after code refactoring diffs
+- Persistent local scan history (localStorage cache) to reload past reports instantly
 - Bilingual interface (English / Hindi)
-- Gemma AI chat for contextual project Q&A
 
-> **No server required.** All analysis runs in the browser. GitHub sync uses the public GitHub REST API directly — no XAMPP, no PHP, no git binary needed.
+> **No server required.** All analysis runs in the browser. GitHub/GitLab sync uses direct REST APIs in the client — no XAMPP, no PHP, no git binary needed.
 
 ---
 
@@ -75,18 +76,19 @@
 | Feature | Description |
 |---|---|
 | 🔒 **Privacy-First** | 100% local analysis. No code leaves your machine. |
-| 🌐 **GitHub Direct Sync** | Fetches repositories via GitHub REST API — no backend required |
-| 🧠 **Multi-Language Detection** | 25+ file types: PHP, JS/TS, Python, Ruby, Go, Rust, Java, HTML, CSS, SQL, YAML, TOML and more |
-| 🏷️ **Real Framework Labels** | Detects Next.js, Express, Laravel, Django, Flask, Vue, Angular, NestJS |
-| 🔍 **Security Scanning** | OWASP-aligned: eval(), innerHTML, mysql_query(), hardcoded secrets, XSS risks |
-| 📡 **API Surface Mapping** | Extracts routes from Express, Next.js (Pages + App Router), Laravel, FastAPI, Flask |
-| 🗺️ **Dependency Graph** | Mermaid.js 2D flowchart + interactive 3D orbit visualization with SVG caching |
-| 📊 **Health Score** | Weighted security score (0–100) with letter grade (A+ → D) |
-| 💬 **Gemma AI Chat** | Keyword-aware assistant with project-specific responses |
-| 🌐 **Bilingual UI** | Toggle between English and Hindi for all tab labels |
-| 📥 **JSON Export** | Download full audit report as structured JSON |
-| ⚡ **Real-time Progress** | File-by-file fetch and analysis progress during scanning |
-| ↩️ **Error Recovery** | "Try Again" properly resets state without page reload |
+| 🗄️ **Persistent Scan Caching** | Local scan history panel displays past reports immediately without re-scanning. |
+| 🖥️ **Screen Size Fit & Lock** | Viewport locked to `100dvh` (no overall page scroll), ensuring all components fit beautifully. |
+| 🎯 **Interactive Scroll Hint** | Animated bouncing scrollchevron that fades out automatically as you scroll and scrolls to scans on click. |
+| 💬 **Pinned Gemma AI Chat** | Chat input and header are pinned at the top/bottom while message list scrolls internally. |
+| 🌐 **Git Cloud Direct Sync** | Fetches repositories via GitHub/GitLab REST API — supports PAT for private repos. |
+| 🧠 **Multi-Language Detection** | 25+ file types: PHP, JS/TS, Python, Ruby, Go, Rust, Java, HTML, CSS, SQL, TOML and more. |
+| 🏷️ **Real Framework Labels** | Detects Next.js, Express, Laravel, Django, Flask, Vue, Angular, NestJS. |
+| 🔍 **Security Scanning** | OWASP-aligned: eval(), mysql_query(), hardcoded secrets, XSS risks. |
+| 📡 **API Surface Mapping** | Extracts routes from Express, Next.js (Pages + App Router), Laravel, FastAPI, Flask. |
+| 🗺️ **Dependency Graph** | Mermaid.js 2D flowchart with custom color tokens and SVG caching. |
+| 📊 **Health Score** | Weighted security score (0–100) with letter grade (A+ → D). |
+| 🌐 **Bilingual UI** | Toggle between English and Hindi for all tab labels. |
+| 📥 **JSON & HTML Export** | Download full audit report as structured JSON or premium HTML page. |
 
 ---
 
@@ -100,11 +102,12 @@
 | **Icons** | Lucide React |
 | **Dependency Graph** | Mermaid.js 11 |
 | **Local Analysis Engine** | Custom TypeScript analyzer (`src/lib/analyzer.ts`) |
-| **GitHub Integration** | GitHub REST API v3 (browser-native fetch, no auth required for public repos) |
-| **Styling** | Vanilla CSS with custom design tokens |
+| **Scan History Cache** | LocalStorage API wrapper (`src/lib/cache/scanHistory.ts`) |
+| **Git Integrations** | GitHub & GitLab REST API client (browser-native fetch) |
+| **Styling** | Vanilla CSS + custom design token sheets (`src/styles/`) |
 | **Typography** | Inter + Outfit (Google Fonts) |
 
-> ⚠️ `api/analyze_repo.php` is present but **no longer used**. GitHub sync now runs entirely in the browser via `App.tsx → handleRepoAnalyze()`.
+> ⚠️ `api/analyze_repo.php` is present but **no longer used**. Cloud sync now runs entirely in the browser.
 
 ---
 
@@ -116,60 +119,32 @@ Gemma-Doc-Pro/
 ├── src/
 │   ├── assets/
 │   ├── components/
-│   │   └── UIComponents.tsx        # FeatureCard and reusable UI primitives
+│   │   ├── RecentScansPanel.tsx    # Persistent scan history list
+│   │   └── UIComponents.tsx        # FeatureCard, StatBadge and UI primitives
 │   ├── lib/
+│   │   ├── cache/
+│   │   │   └── scanHistory.ts      # scan history local storage helper
+│   │   ├── cloud/
+│   │   │   ├── github.ts           # GitHub REST API sync provider
+│   │   │   ├── gitlab.ts           # GitLab REST API sync provider
+│   │   │   ├── types.ts            # Git cloud types
+│   │   │   └── index.ts            # Cloud client provider entry
+│   │   ├── export/
+│   │   │   └── htmlExport.ts       # Self-contained HTML report exporter
 │   │   └── analyzer.ts             # Core analysis engine
-│   │       ├── TechStackItem       # Type: lang, count, loc, framework, security
-│   │       ├── DocData             # Type: full audit report shape
-│   │       ├── detectFrameworks()  # Reads package.json / composer.json / requirements.txt
-│   │       ├── frameworkForLang()  # Maps language → real framework label (no "Vanilla")
-│   │       ├── analyzeOne()        # Per-file: LOC, security rules, import extraction
-│   │       └── analyzeUploadedProject()  # Entry point: batched async analysis
+│   ├── styles/
+│   │   ├── animations.css          # Core keyframes (spin, bounce-y, glow)
+│   │   └── utilities.css           # Utility classes (glass cards, badge pills)
 │   ├── views/
 │   │   ├── LandingView.tsx         # Splash/Hero screen
-│   │   ├── DashboardView.tsx       # Input panel (GitHub URL sync + local upload)
-│   │   └── DocView.tsx             # Main report dashboard (7 tabs + right panel)
-│   ├── App.tsx                     # Root router + state management + GitHub API logic
-│   ├── index.css                   # Full design system (tokens, grid, typography)
+│   │   ├── DashboardView.tsx       # Input panel (sync + local upload + scroll hint)
+│   │   └── DocView.tsx             # Tabbed report viewer (fixed tabs, pinned chat)
+│   ├── App.tsx                     # Main router + global viewport wrappers
+│   ├── index.css                   # Global reset, typography, and base layout styles
 │   └── main.tsx                    # React root mount
-├── api/
-│   └── analyze_repo.php            # Legacy PHP backend (NOT used — kept for reference only)
 ├── package.json
 ├── tsconfig.json
 └── vite.config.ts
-```
-
-
-
-### State Flow
-
-```
-LandingView
-    ↓ onStart()
-DashboardView
-    ↓ onFolderSelect(files)     → analyzeUploadedProject(files) → DocData
-    ↓ onRepoAnalyze(githubUrl)  → GitHub REST API → synthetic Files → analyzeUploadedProject() → DocData
-DocView
-    ↓ onBack()
-DashboardView (reset, analysisError cleared)
-```
-
-### GitHub Sync Flow (browser-only)
-
-```
-User enters: github.com/owner/repo
-    ↓
-Parse URL → extract owner + repo
-    ↓
-GET api.github.com/repos/{owner}/{repo}/git/trees/HEAD?recursive=1
-    ↓
-Filter: code files only, ignore node_modules/.git/dist/vendor, cap at 300 files
-    ↓
-Batch fetch (8 concurrent): api.github.com/repos/{owner}/{repo}/contents/{path}
-    ↓
-base64 decode → new File() with webkitRelativePath = "{repo}/{path}"
-    ↓
-analyzeUploadedProject(syntheticFiles) → DocData → DocView
 ```
 
 ---
@@ -180,9 +155,6 @@ analyzeUploadedProject(syntheticFiles) → DocData → DocView
 
 - Node.js ≥ 18
 - npm ≥ 9
-- Internet connection (for GitHub sync only)
-
-> **No XAMPP. No PHP. No git binary required.**
 
 ### Installation
 
@@ -192,142 +164,47 @@ npm install
 npm run dev
 ```
 
-App opens at: **http://localhost:5173**
+App opens at: **http://localhost:5174** (or port configured by Vite)
 
 ### Build for Production
 
 ```bash
 npm run build
-# Output in /dist — deployable to Vercel, Netlify, or any static host
+# Output in /dist — deployable to Vercel, Netlify, Github Pages or XAMPP
 ```
 
 ---
 
 ## Usage Guide
 
-### Option 1: GitHub Repository Sync
+### Option 1: Git Repository Sync
 
-1. Click **Get Started Now** on the landing page
-2. In the "Sync from Cloud" input, paste any public GitHub URL:
-   - `github.com/expressjs/express`
-   - `https://github.com/laravel/laravel`
-   - `https://github.com/django/django`
+1. Click **Get Started Now** on the landing page.
+2. In the "Sync from Cloud" input, paste any public GitHub/GitLab URL.
 3. Click **Sync →**
-4. Watch real-time progress as files are fetched from GitHub API
-5. The full audit report opens automatically
-
-**Limits:**
-- Public repositories only (private repos require a GitHub Personal Access Token — not yet implemented)
-- GitHub API rate limit: 60 requests/hour unauthenticated. For large repos, wait or add a PAT.
-- Files capped at 300 per analysis to stay within rate limits
+4. Optional: Click **Add GitHub PAT** to authenticate for higher rate limits or private repos.
 
 ### Option 2: Local Project Upload
 
-1. Click the **"Drop folder or click to browse"** dropzone
-2. Select your project's root folder
-3. Watch real-time progress as files are scanned locally
-
-**Supported file types:** `.js`, `.jsx`, `.ts`, `.tsx`, `.php`, `.py`, `.rb`, `.go`, `.rs`, `.java`, `.kt`, `.cs`, `.html`, `.htm`, `.css`, `.scss`, `.json`, `.md`, `.yml`, `.yaml`, `.sql`, `.toml`, `.swift`, `.c`, `.cpp`, `.h`
-
-**Ignored directories:** `node_modules`, `vendor`, `.git`, `dist`, `build`, `.next`, `coverage`, `__pycache__`, `.venv`
-
----
-
-## Analysis Capabilities
-
-### Framework Detection
-
-| Language | Detected From | Examples |
-|---|---|---|
-| JS / TS | `package.json` dependencies | Next.js, Nuxt, Angular, Vue, Svelte, React, Vite, Express, Fastify, NestJS, Koa |
-| PHP | `composer.json` + `artisan` file | Laravel, Symfony, WordPress |
-| Python | `requirements.txt` / `pyproject.toml` | Django, Flask, FastAPI |
-
-### Framework Labels in Audit Intelligence
-
-| Language | Label Shown |
-|---|---|
-| JS (with Express) | `Express` |
-| JS (no package.json) | `JavaScript` |
-| TS (with Next.js) | `Next.js` |
-| PHP (with Laravel) | `Laravel` |
-| PHP (plain) | `PHP` |
-| Python (with Django) | `Django` |
-| CSS / SCSS | `Stylesheet` |
-| HTML | `HTML5 Markup` |
-| JSON | `Config / Data` |
-| YAML | `Config / IaC` |
-| SQL | `Database` |
-| Markdown | `Documentation` |
-| Ruby | `Ruby` |
-| Go | `Go` |
-| Rust | `Rust` |
-
-### Security Rules (OWASP-aligned)
-
-| Rule | Severity | Pattern |
-|---|---|---|
-| `js_eval` | 🔴 High | `eval()` usage |
-| `js_new_function` | 🔴 High | `new Function()` |
-| `js_innerhtml` | 🟡 Medium | `.innerHTML =` |
-| `react_dangerous_html` | 🟡 Medium | `dangerouslySetInnerHTML` |
-| `php_mysql_query` | 🔴 High | `mysql_query()` deprecated API |
-| `php_eval` | 🔴 High | PHP `eval()` |
-| `py_eval` / `py_exec` | 🔴 High | Python `eval()` / `exec()` |
-| `secret_*` | 🔴 High | Private keys, GitHub PATs, AWS keys |
-| `secret_generic_assignment` | 🟡 Medium | Hardcoded `password =`, `api_key =` |
-
-### API Endpoint Detection
-
-| Framework | Pattern |
-|---|---|
-| Express | `app.get('/x')`, `router.post('/x')`, chained `router.route()` |
-| Fastify | `fastify.route({ method, url })` |
-| Next.js Pages Router | `pages/api/**` + `req.method` parsing |
-| Next.js App Router | `app/api/**/route.ts` + exported handlers |
-| Laravel | `Route::get()`, `Route::apiResource()` |
-| FastAPI | `@app.get('/x')` decorators |
-| Flask | `@app.route('/x', methods=[...])` |
-
----
-
-## QA Test Report
-
-**Test Date:** 2026-05-18 | **Environment:** macOS, Vite dev server, Chrome
-
-### Final Test Summary
-
-| Test Phase | Tests Run | Passed | Failed |
-|---|---|---|---|
-| Bug Verification | 5 | 5 | 0 |
-| Regression Testing | 4 | 4 | 0 |
-| Functional Testing | 5 | 5 | 0 |
-| Performance Testing | 4 | 4 | 0 |
-| Console Error Testing | 3 | 3 | 0 |
-| Security Testing | 3 | 3 | 0 |
-| **TOTAL** | **24** | **24** | **0** |
-
-### Key Verified Results
-
-| Test | Result |
-|---|---|
-| Landing page loads without scroll | ✅ PASS |
-| GitHub sync via REST API (expressjs/express) | ✅ PASS — 59 files, 5,493 LOC, 50 routes |
-| "VANILLA" label in Audit Intelligence | ✅ FIXED — Shows real labels |
-| "Try Again" resets state without page reload | ✅ PASS |
-| Mermaid SVG cached on tab switch | ✅ PASS — Instant on return visit |
-| Chat send button labeled "Send ↑" | ✅ PASS |
-| `javascript:alert(1)` XSS attempt | ✅ PASS — Blocked, shows error |
-| `<script>` tag in URL | ✅ PASS — Sanitized |
-| LocalStorage sensitive data check | ✅ PASS — Nothing stored |
-| Console errors on load | ✅ PASS — Zero errors |
-| Header overflow on small screens | ✅ PASS — clamp() applied |
+1. Click the **"Drop folder or click to browse"** dropzone.
+2. Select your project's root folder.
+3. Watch real-time progress as files are audited locally in milliseconds.
 
 ---
 
 ## Bug Fix History
 
-### Session 1 Fixes (2026-05-18)
+### Session 2 Fixes (Latest Layout & Render Fixes)
+
+| Bug | Severity | Status | Fix |
+|---|---|---|---|
+| **Render Crash** Blank screen upon document view load | 🔴 Critical | ✅ Fixed | Restored missing `Network` icon import in `DocView.tsx` |
+| **Overflow / Cutoff** Layout stretched and cut off components | 🔴 High | ✅ Fixed | Locked body, root, and App wrappers to `100dvh` with `overflow: hidden` |
+| **Gemma Chat Scroll** Pushed input off-screen on messages scroll | 🔴 High | ✅ Fixed | Pinned chat header and text field, scrolling messages internally |
+| **Hidden Tab Bar** Tab buttons scrolled off-screen when browsing | 🟡 Low | ✅ Fixed | Changed Left Column layout to keep tabs fixed and scroll panels internally |
+| **Scroll Awareness** Users unaware of Recent Scans below | 🟡 Low | ✅ Fixed | Added bouncing Chevron hint that fades out on scroll & auto-scrolls on click |
+
+### Session 1 Fixes (Core Analysis Fixes)
 
 | Bug | Severity | Status | Fix |
 |---|---|---|---|
@@ -337,28 +214,6 @@ npm run build
 | **BUG-004** Dashboard header overflow on small screens | 🟡 Low | ✅ Fixed | `marginBottom: clamp(1.5rem, 4vh, 5rem)` |
 | **BUG-005** Mermaid SVG re-renders on every tab switch | 🟡 Low | ✅ Fixed | Added `useRef<Map<string, string>>` SVG cache |
 | **VANILLA Bug** All languages showing "Vanilla" framework | 🔴 High | ✅ Fixed | Rewrote `frameworkForLang()` with semantic labels per language |
-
----
-
-## Security
-
-- All analysis runs client-side in the browser — **zero data exfiltration**
-- GitHub API is called directly from the browser — only public repo metadata and file contents are fetched
-- No authentication tokens or API keys are stored anywhere
-- `dangerouslySetInnerHTML` is used only for trusted Mermaid SVG output (`securityLevel: 'loose'` is intentional for diagram rendering)
-- XSS injection via URL input (`javascript:`, `<script>`) is blocked at the URL validation layer before any fetch is made
-- LocalStorage and SessionStorage are not used
-
----
-
-## Known Limitations
-
-| Limitation | Workaround |
-|---|---|
-| GitHub public repos only | Add GitHub PAT to fetch headers for private repo support (planned) |
-| GitHub API rate limit: 60 req/hour unauthenticated | Wait ~1 hour or implement PAT input field |
-| File cap: 300 files per GitHub sync | Use local folder upload for large codebases |
-| `api/analyze_repo.php` (legacy PHP backend) not functional on standard XAMPP | Not needed — GitHub sync is now browser-native |
 
 ---
 
