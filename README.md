@@ -45,12 +45,7 @@
 - [Project Architecture](#project-architecture)
 - [Getting Started](#getting-started)
 - [Usage Guide](#usage-guide)
-- [Analysis Capabilities](#analysis-capabilities)
-- [QA Test Report](#qa-test-report)
-- [Bug Fix History](#bug-fix-history)
-- [Security](#security)
-- [Known Limitations](#known-limitations)
-- [Roadmap](#roadmap)
+- [License](#license)
 
 ---
 
