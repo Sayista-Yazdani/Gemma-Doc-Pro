@@ -1,0 +1,262 @@
+/* ============================================================
+   Gemma Doc Pro — Global Design System
+   Order matters: animations → utilities → layout → responsive
+   ============================================================ */
+@import './styles/animations.css';
+@import './styles/utilities.css';
+
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;700;800;900&display=swap');
+
+/* ── CSS Custom Properties ─────────────────────────────────── */
+:root {
+  --bg-dark:      #020617;
+  --bg-card:      rgba(15, 23, 42, 0.7);
+  --accent:       #3b82f6;
+  --accent-glow:  rgba(59, 130, 246, 0.3);
+  --purple:       #a855f7;
+  --green:        #10b981;
+  --red:          #f43f5e;
+  --amber:        #f59e0b;
+  --text-main:    #f8fafc;
+  --text-muted:   #94a3b8;
+  --border-light: rgba(255, 255, 255, 0.08);
+  font-family: 'Inter', 'Outfit', sans-serif;
+}
+
+/* ── Reset ─────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Base Body ──────────────────────────────────── */
+body {
+  background: var(--bg-dark);
+  color: var(--text-main);
+  height: 100dvh;
+  overflow: hidden; /* Lock entire viewport */
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  background-image:
+    radial-gradient(circle at 0% 0%,   #1e1b4b 0%, transparent 55%),
+    radial-gradient(circle at 100% 100%, #0f172a 0%, #020617 100%);
+  background-attachment: fixed;
+}
+
+#root {
+  width: 100%;
+  height: 100dvh;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* ── Container ─────────────────────────────────────────────── */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Glass card (Landing page) ─────────────────────────────── */
+.glass-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border-light);
+  border-radius: 3rem;
+  box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.75);
+  width: 100%;
+  max-height: calc(100dvh - 3rem);
+  padding: clamp(1.5rem, 3vw, 2.5rem) clamp(2rem, 6vw, 5rem);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: hidden;
+}
+
+/* ── Typography ────────────────────────────────────────────── */
+h1 {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+}
+h2 { font-family: 'Outfit', sans-serif; font-size: 2rem;   font-weight: 700; }
+h3 { font-family: 'Outfit', sans-serif; font-size: 2.25rem; font-weight: 700; }
+
+.text-gradient {
+  background: linear-gradient(135deg, #60a5fa 0%, #c084fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Feature grid (Landing) ────────────────────────────────── */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.feature-item {
+  padding: 1.5rem 1.75rem;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--border-light);
+  border-radius: 2rem;
+  transition: background 0.35s ease, transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+}
+.feature-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-8px);
+  border-color: rgba(59, 130, 246, 0.35);
+  box-shadow: 0 20px 50px rgba(59, 130, 246, 0.1);
+}
+
+/* ── Dropzone ──────────────────────────────────────────────── */
+.dropzone {
+  width: 100%;
+  border: 2px dashed rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.02);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+}
+.dropzone:hover {
+  background: rgba(59, 130, 246, 0.04);
+  border-color: rgba(59, 130, 246, 0.35);
+  box-shadow: 0 15px 40px rgba(59, 130, 246, 0.08);
+}
+
+/* ── Primary button ────────────────────────────────────────── */
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  padding: 1.25rem 3rem;
+  border-radius: 1.5rem;
+  border: none;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 16px 40px var(--accent-glow);
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.35s ease;
+}
+.btn-primary:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 28px 60px var(--accent-glow);
+}
+
+/* ── Icon box (hero) ───────────────────────────────────────── */
+.icon-box {
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 2rem;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* ── Dashboard two-column grid ─────────────────────────────── */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 4rem;
+  align-items: center;
+}
+
+/* ── DocView two-column grid ───────────────────────────────── */
+.docview-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+/* ── Spacing utilities ─────────────────────────────────────── */
+.mb-4  { margin-bottom: 0.75rem; }
+.mb-6  { margin-bottom: 1rem; }
+.mb-8  { margin-bottom: 1.25rem; }
+.mb-10 { margin-bottom: 1.5rem; }
+.mb-12 { margin-bottom: 1.75rem; }
+.mb-16 { margin-bottom: 2rem; }
+.mt-8  { margin-top: 1.25rem; }
+.mt-10 { margin-top: 1.5rem; }
+
+/* ── ≤ 1024px: tablet — Dashboard + DocView scroll freely ── */
+@media (max-width: 1024px) {
+  body {
+    height: auto;
+    min-height: 100dvh;
+    overflow-y: auto;
+    align-items: flex-start;
+  }
+  /* Landing still locked even on tablet */
+  body.landing-page {
+    height: 100dvh;
+    overflow: hidden;
+  }
+  #root {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+    padding: 1rem;
+    align-items: flex-start;
+  }
+  body.landing-page #root {
+    height: 100dvh;
+    overflow: hidden;
+  }
+  .glass-card {
+    max-height: none;
+    overflow: hidden;
+    padding: 2rem 2rem;
+  }
+  .features-grid  { grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+  .docview-grid   { grid-template-columns: 1fr; }
+  .dashboard-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+  h1 { font-size: 3rem; }
+}
+
+/* ── ≤ 768px: mobile ──────────────────────────────── */
+@media (max-width: 768px) {
+  .glass-card     { padding: 2rem 1.25rem; border-radius: 2rem; overflow-y: auto; }
+  .features-grid  { grid-template-columns: 1fr; }
+  .btn-primary    { padding: 0.9rem 1.75rem; font-size: 0.95rem; }
+  .docview-grid   { gap: 1.5rem; }
+  .dashboard-grid { gap: 2rem; }
+}
+
+/* ── ≤ 480px: small mobile ───────────────────────── */
+@media (max-width: 480px) {
+  #root           { padding: 0.75rem; }
+  .glass-card     { padding: 1.5rem 1rem; border-radius: 1.5rem; }
+  h1              { font-size: 2.25rem; }
+  h2              { font-size: 1.5rem; }
+  .features-grid  { gap: 0.75rem; }
+  .feature-item   { padding: 1.1rem; border-radius: 1.5rem; }
+  .btn-primary    { padding: 0.85rem 1.5rem; font-size: 0.875rem; }
+  .tab-pill-nav   { border-radius: 1rem; }
+  .tab-pill       { padding: 0.4rem 0.75rem; font-size: 0.62rem; }
+  .dashboard-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+}
