@@ -19,21 +19,21 @@
 ![Dashboard](gemma-doc-screenshoots/ss-1.png)
 
 ### Second Dashboard View
-![Security](gemma-doc-screenshoots/ss-2.png)
+![Security](gemma-doc-screenshoots/ss-6.png)
 
 ### First summary Dashboard
-![Security](gemma-doc-screenshoots/ss-3.png)
-
-### API Surface Tab
-![Graph](gemma-doc-screenshoots/ss-4.png)
+![Security](gemma-doc-screenshoots/ss-2.png)
 
 ### Security Analysis
 ![Security](gemma-doc-screenshoots/ss-5.png)
 
 ### Dependency Graph
-![Graph](gemma-doc-screenshoots/ss-7.png)
+![Graph](gemma-doc-screenshoots/ss-3.png)
 
 ### Gemma AI Chat
+![Graph](gemma-doc-screenshoots/ss-4.png)
+
+### Export HTML
 ![Graph](gemma-doc-screenshoots/ss-6.png)
 
 
@@ -189,31 +189,6 @@ npm run build
 1. Click the **"Drop folder or click to browse"** dropzone.
 2. Select your project's root folder.
 3. Watch real-time progress as files are audited locally in milliseconds.
-
----
-
-## Bug Fix History
-
-### Session 2 Fixes (Latest Layout & Render Fixes)
-
-| Bug | Severity | Status | Fix |
-|---|---|---|---|
-| **Render Crash** Blank screen upon document view load | 🔴 Critical | ✅ Fixed | Restored missing `Network` icon import in `DocView.tsx` |
-| **Overflow / Cutoff** Layout stretched and cut off components | 🔴 High | ✅ Fixed | Locked body, root, and App wrappers to `100dvh` with `overflow: hidden` |
-| **Gemma Chat Scroll** Pushed input off-screen on messages scroll | 🔴 High | ✅ Fixed | Pinned chat header and text field, scrolling messages internally |
-| **Hidden Tab Bar** Tab buttons scrolled off-screen when browsing | 🟡 Low | ✅ Fixed | Changed Left Column layout to keep tabs fixed and scroll panels internally |
-| **Scroll Awareness** Users unaware of Recent Scans below | 🟡 Low | ✅ Fixed | Added bouncing Chevron hint that fades out on scroll & auto-scrolls on click |
-
-### Session 1 Fixes (Core Analysis Fixes)
-
-| Bug | Severity | Status | Fix |
-|---|---|---|---|
-| **BUG-001** "Try Again" permanently stuck on error screen | 🔴 High | ✅ Fixed | Added `onRetry` prop; calls parent `setAnalysisError(null)` |
-| **BUG-002** GitHub Sync non-functional (XAMPP write error) | 🔴 Critical | ✅ Fixed | Replaced PHP backend with direct GitHub REST API in `App.tsx` |
-| **BUG-003** Chat send button labeled "Gemma Chat" | 🟡 Low | ✅ Fixed | Changed to `"Send ↑"` |
-| **BUG-004** Dashboard header overflow on small screens | 🟡 Low | ✅ Fixed | `marginBottom: clamp(1.5rem, 4vh, 5rem)` |
-| **BUG-005** Mermaid SVG re-renders on every tab switch | 🟡 Low | ✅ Fixed | Added `useRef<Map<string, string>>` SVG cache |
-| **VANILLA Bug** All languages showing "Vanilla" framework | 🔴 High | ✅ Fixed | Rewrote `frameworkForLang()` with semantic labels per language |
 
 ---
 
