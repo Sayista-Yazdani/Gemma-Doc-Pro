@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, Download, Code2, Zap, Shield, Globe, Copy, Check, FileText, Network } from 'lucide-react';
 import mermaid from 'mermaid';
@@ -85,7 +85,7 @@ export const DocView: React.FC<DocViewProps> = ({ docData, onBack }) => {
   const [selectedDiff, setSelectedDiff] = useState<{ original: string; optimized: string } | null>(null);
   const [lang, setLang] = useState<Lang>('en');
   const [isTyping, setIsTyping] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([{
+  const [messages, setMessages] = useState<ChatMessage[]>(() => [{
     role: 'assistant',
     content: `Hello! I've analyzed **${docData.projectName}**. I'm ready to provide architectural insights. How can I help?`,
     ts: Date.now(),
@@ -95,11 +95,11 @@ export const DocView: React.FC<DocViewProps> = ({ docData, onBack }) => {
   const svgCacheRef = useRef<Map<string, string>>(new Map());
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  const endpoints     = docData.api?.endpoints || [];
-  const riskFindings  = docData.risk?.findings || [];
-  const secFindings   = docData.security?.findings || [];
-  const optimizations = docData.optimizations || [];
-  const highFindings  = [...riskFindings, ...secFindings].filter((f) => f.severity === 'high');
+  const endpoints     = useMemo(() => docData.api?.endpoints || [], [docData.api?.endpoints]);
+  const riskFindings  = useMemo(() => docData.risk?.findings || [], [docData.risk?.findings]);
+  const secFindings   = useMemo(() => docData.security?.findings || [], [docData.security?.findings]);
+  const optimizations = useMemo(() => docData.optimizations || [], [docData.optimizations]);
+  const highFindings  = useMemo(() => [...riskFindings, ...secFindings].filter((f) => f.severity === 'high'), [riskFindings, secFindings]);
   const depEdges      = (docData.dependencyGraph || '').split('\n').filter((l) => l.includes('-->')).length;
   const dynamicScore  = Math.round(docData.health?.score ?? 0);
   const dynamicGrade  = docData.health?.grade ?? (dynamicScore >= 93 ? 'A+' : dynamicScore >= 88 ? 'A' : dynamicScore >= 80 ? 'B' : dynamicScore >= 70 ? 'C' : 'D');
@@ -159,9 +159,9 @@ export const DocView: React.FC<DocViewProps> = ({ docData, onBack }) => {
   // ── Chat send ──
   const handleSend = useCallback(() => {
     if (!input.trim() || isTyping) return;
+    const currentInput = input.trim().toLowerCase();
     const userMsg: ChatMessage = { role: 'user', content: input, ts: Date.now() };
     setMessages((prev) => [...prev, userMsg]);
-    const currentInput = input.toLowerCase();
     setInput('');
     setIsTyping(true);
 
@@ -172,19 +172,19 @@ export const DocView: React.FC<DocViewProps> = ({ docData, onBack }) => {
       if (currentInput.includes('yes') || currentInput.includes('guide') || currentInput.includes('refactor') || currentInput.includes('हाँ') || currentInput.includes('सुधार')) {
         botResponse = isHi
           ? `बिल्कुल। **${riskFindings[0]?.files?.[0] || 'मुख्य मॉड्यूल'}** में SQL Injection को रोकने के लिए parameterized queries लागू करें।`
-          : `Absolutely. In **${riskFindings[0]?.files?.[0] || 'the core module'}**, implement \`parameterized queries\` to prevent SQL Injection, as flagged in the Audit Roadmap.`;
+          : 'Absolutely. In **' + (riskFindings[0]?.files?.[0] || 'the core module') + '**, implement `parameterized queries` to prevent SQL Injection, as flagged in the Audit Roadmap.';
       } else if (currentInput.includes('architecture') || currentInput.includes('stack') || currentInput.includes('framework') || currentInput.includes('संरचना')) {
         botResponse = isHi
           ? `यह प्रोजेक्ट **${docData.techStack?.[0]?.framework || 'एक आधुनिक संरचना'}** का उपयोग करता है। Neural Map ने **${depEdges}** logical edges detect किए।`
           : `This project uses **${docData.techStack?.[0]?.framework || 'a modern architecture'}**. The Neural Map detected **${depEdges}** core logical edges.`;
       } else if (currentInput.includes('security') || currentInput.includes('risk') || currentInput.includes('vulnerability') || currentInput.includes('सुरक्षा')) {
         botResponse = isHi
-          ? `मुझे **${highFindings.length} उच्च-गंभीरता** के मुद्दे मिले। सबसे महत्वपूर्ण: \"${highFindings[0]?.title || 'कोई नहीं'}\".`
-          : `Found **${highFindings.length} high-severity issues**. Most critical: \`${highFindings[0]?.title || 'None'}\`. Check the Security tab for full details.`;
+          ? `मुझे **${highFindings.length} उच्च-गंभीरता** के मुद्दे मिले। सबसे महत्वपूर्ण: "${highFindings[0]?.title || 'कोई नहीं'}".`
+          : 'Found **' + highFindings.length + ' high-severity issues**. Most critical: `' + (highFindings[0]?.title || 'None') + '`. Check the Security tab for full details.';
       } else {
         botResponse = isHi
           ? `**${docData.projectName}** विश्लेषण के आधार पर, ${riskFindings[0]?.files?.[0] || 'core directory'} में सुरक्षा सुदृढ़ीकरण की सलाह है।`
-          : `Based on **${docData.projectName}**, I recommend focusing on \`${riskFindings[0]?.files?.[0] || 'the core directory'}\` for security hardening. Want a detailed guide?`;
+          : 'Based on **' + docData.projectName + '**, I recommend focusing on `' + (riskFindings[0]?.files?.[0] || 'the core directory') + '` for security hardening. Want a detailed guide?';
       }
 
       setIsTyping(false);

@@ -66,6 +66,7 @@ export function loadScans(): CacheEntry[] {
 
     const parsed = JSON.parse(decompressed);
     if (!Array.isArray(parsed)) return [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return parsed.filter((item: any) => {
       return (
         item &&
