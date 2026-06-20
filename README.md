@@ -24,9 +24,6 @@
 ### First summary Dashboard
 ![Security](gemma-doc-screenshoots/ss-2.png)
 
-### Security Analysis
-![Security](gemma-doc-screenshoots/ss-5.png)
-
 ### Dependency Graph
 ![Graph](gemma-doc-screenshoots/ss-3.png)
 
@@ -34,7 +31,7 @@
 ![Graph](gemma-doc-screenshoots/ss-4.png)
 
 ### Export HTML
-![Graph](gemma-doc-screenshoots/ss-6.png)
+![Graph](gemma-doc-screenshoots/ss-5.png)
 
 
 ## Table of Contents
